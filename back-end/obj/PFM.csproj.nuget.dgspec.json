@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Instructor\\Desktop\\PFM\\PFM.csproj": {}
+    "C:\\Users\\Instructor\\Desktop\\PFM\\PFM\\back-end\\PFM.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Instructor\\Desktop\\PFM\\PFM.csproj": {
+    "C:\\Users\\Instructor\\Desktop\\PFM\\PFM\\back-end\\PFM.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Instructor\\Desktop\\PFM\\PFM.csproj",
+        "projectUniqueName": "C:\\Users\\Instructor\\Desktop\\PFM\\PFM\\back-end\\PFM.csproj",
         "projectName": "PFM",
-        "projectPath": "C:\\Users\\Instructor\\Desktop\\PFM\\PFM.csproj",
+        "projectPath": "C:\\Users\\Instructor\\Desktop\\PFM\\PFM\\back-end\\PFM.csproj",
         "packagesPath": "C:\\Users\\Instructor\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Instructor\\Desktop\\PFM\\obj\\",
+        "outputPath": "C:\\Users\\Instructor\\Desktop\\PFM\\PFM\\back-end\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Instructor\\AppData\\Roaming\\NuGet\\NuGet.Config"

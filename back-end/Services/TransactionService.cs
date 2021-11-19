@@ -32,7 +32,16 @@ namespace PFM.Services{
                 var kind=(TransactionKind)Enum.Parse(typeof(TransactionKind),transactionKind,true);
                 transactionList= await _transactionRepository.Get(kind,startDate,endDate,page,pageSize,sortBy,sortOrder);
             }
-            return _mapper.Map<TransactionPagedList<Transaction>>(transactionList);
+            var transactions=_mapper.Map<TransactionPagedList<Transaction>>(transactionList);
+            foreach(Transaction t in transactions.Items){
+                var splited=await _transactionRepository.GetSplitsIfExists(t.Id);
+               // t.splits=_mapper.Map<List<SplitTransaction>>(splited);
+                foreach(SplitTransactionEntity s in splited){
+                   t.splits.Add(_mapper.Map<SplitTransaction>(s));
+                }
+            
+            }
+            return transactions;
         }
 
         public async Task<List<Transaction>> ImportTransactions(List<Transaction> transactions)
@@ -64,11 +73,17 @@ namespace PFM.Services{
             var transactionToSplit=await _transactionRepository.GetTransaction(id);
             if(transactionToSplit==null)
             return null;
-            var check=await _transactionRepository.DeleteIfExists(id);
-            transactionToSplit.splits=new List<SplitTransactionEntity>();
             var totalAmount=transactionToSplit.Amount;
             totalAmount??= 0;
             //var dict=new Dictionary<string,double>();
+            Double checkAmount=0;
+            foreach(SingleCategorySplit split in command.splits){
+                checkAmount+=split.amount;
+            }
+            if(checkAmount!=totalAmount.Value)
+            return null;
+            var check=await _transactionRepository.DeleteIfExists(id);
+            transactionToSplit.splits=new List<SplitTransactionEntity>();
             foreach(SingleCategorySplit split in command.splits){
                 var catCode=split.catcode;
                 //var category= await _dbContext.Categories.FirstOrDefaultAsync(x=>x.Code==catcode);
@@ -86,18 +101,46 @@ namespace PFM.Services{
                 transactionToSplit.splits.Add(splitEntity);
                 if(totalAmount-amount>0){
                     await _transactionRepository.ImportSplitTransactionEntity(splitEntity);
-                    await _transactionRepository.UpdateTransaction(transactionToSplit);
                 }
                 else{
                     splitEntity.Amount=totalAmount.Value;
                     await _transactionRepository.ImportSplitTransactionEntity(splitEntity);
-                    await _transactionRepository.UpdateTransaction(transactionToSplit);
                     break;
                 }
-
+                
                 totalAmount=totalAmount-amount;
             }
+            var p=await _transactionRepository.UpdateTransaction(transactionToSplit);
             return _mapper.Map<Transaction>(transactionToSplit);
+        }
+
+        public async Task<SpendingByCategory> GetAnalytics(string catCode, DateTime? startDate, DateTime? endDate, Direction? direction)
+        {
+            var spendingByCategory=new SpendingByCategory{
+                Groups=new List<SpendingInCategory>()
+            };
+            var transactions= _mapper.Map<List<Transaction>>(await _transactionRepository.GetAnalytics(catCode,startDate,endDate,direction)) ;
+            var categories= new List<string>();
+            foreach(Transaction transaction in transactions){
+                if(!categories.Contains(transaction.CatCode))
+                categories.Add(transaction.CatCode);
+            }
+            foreach(String cat in categories){
+                var count=0;
+                var amount=0.0;
+                foreach(Transaction t in transactions){
+                    if(t.CatCode==cat){
+                        count++;
+                        amount+=t.Amount.Value;
+                    }
+                }
+                spendingByCategory.Groups.Add(new SpendingInCategory{
+                    Amount=amount,
+                    CatCode=cat,
+                    Count=count
+                });
+            }
+            return spendingByCategory;
         }
     }
 }

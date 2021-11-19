@@ -12,6 +12,10 @@ namespace PFM.Mappings{
             CreateMap<List<Category>,List<CategoryEntity>>();
             CreateMap<CategoryEntity,Category>();
             CreateMap<Category,CategoryEntity>();
+           
+            CreateMap<SplitTransactionEntity,SplitTransaction>();
+
+            //CreateMap<List<SplitTransactionEntity>,List<SplitTransaction>>();
         }
     }   
 }

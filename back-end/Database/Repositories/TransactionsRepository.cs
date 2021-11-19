@@ -37,6 +37,7 @@ namespace PFM.Database.Repositories{
             
             if(!string.IsNullOrEmpty(sortBy)){
                 if(sortOrder==SortOrder.desc){
+                    //problem 
                     query=query.OrderByDescending(x=>x.Id);
                 }else{
                     query=query.OrderBy(x=>x.Id);
@@ -48,14 +49,16 @@ namespace PFM.Database.Repositories{
                 query=query.OrderBy(x=>x.Id);
             }
             query=query.Skip((page-1)*pageSize).Take(pageSize);
+            var items=await query.ToListAsync();
+        
             return new TransactionPagedList<TransactionEntity>{
                 Page=page,
-            PageSize=pageSize,
-            SortBy=sortBy,
-            SortOrder=sortOrder,
-            TotalCount=total,
-            TotalPages=totalP,
-              Items=await query.ToListAsync()
+                PageSize=pageSize,
+                SortBy=sortBy,
+                SortOrder=sortOrder,
+                TotalCount=total,
+                TotalPages=totalP,
+              Items=items
             };
         }
         public async Task<TransactionEntity> GetTransaction(string id){
@@ -68,7 +71,10 @@ namespace PFM.Database.Repositories{
             return transactionEntity;
 
         }
-
+        public async Task<List<SplitTransactionEntity>> GetSplitsIfExists(string id){
+            var splits=_dbContext.SplitTransactions.Where(x=>x.TransactionId==id);
+            return await splits.ToListAsync();
+        }
         public async Task<SplitTransactionEntity> ImportSplitTransactionEntity(SplitTransactionEntity split)
         {
             
@@ -82,6 +88,21 @@ namespace PFM.Database.Repositories{
             _dbContext.Transactions.Update(transaction);
             await _dbContext.SaveChangesAsync();
             return transaction;
+        }
+
+        public async Task<List<TransactionEntity>> GetAnalytics(string catCode, DateTime? startDate, DateTime? endDate, Direction? direction)
+        {
+            var ret=_dbContext.Transactions.AsQueryable();
+            if(catCode!=null)
+            ret=ret.Where(x=>x.CatCode==catCode);
+            if(startDate!=null)
+            ret=ret.Where(x=>x.Date>=startDate);
+            if(endDate!=null)
+            ret=ret.Where(x=>x.Date<=endDate);
+            if(direction!=null)
+            ret=ret.Where(x=>x.Direction==direction);
+
+            return await ret.ToListAsync();
         }
     }
 }

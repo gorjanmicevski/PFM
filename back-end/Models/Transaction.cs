@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
+using PFM.Database.Entities;
 
 namespace PFM.Models{
     public class Transaction{
@@ -23,5 +25,6 @@ namespace PFM.Models{
         public int? Mcc	{set;get;}
     
         public TransactionKind? Kind{set;get;}
+        public List<SplitTransaction> splits {set;get;}
     }
 }

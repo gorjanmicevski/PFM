@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -11,5 +12,6 @@ namespace PFM.Services{
         Task<Transaction> CategorizeTransaction(string id,TransactionCategorizeCommand command);
 
         Task<Transaction> SplitTransaction(string id,SplitTransactionCommand command);
+        Task<SpendingByCategory> GetAnalytics(string catCode, DateTime? startDate, DateTime? endDate, Direction? direction);
     }
 }
