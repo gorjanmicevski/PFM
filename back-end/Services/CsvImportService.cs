@@ -7,6 +7,7 @@ using System.Linq;
 using PFM.Models;
 using System;
 using PFM.Database.Entities;
+using pfm.Models;
 
 namespace PFM.Services{
    public class CsvImportService : ICsvImportService
@@ -83,12 +84,13 @@ namespace PFM.Services{
                 } 
                     var direction=(Direction) Enum.Parse(typeof(Direction),record.direction,true);
                     var kind=(TransactionKind) Enum.Parse(typeof(TransactionKind),record.kind,true);
-                    int? mcc;
+                    MCC? mcc;
                     if(record.mcc==""){
                         mcc=null;
                     }else
                     {
-                        mcc=int.Parse(record.mcc);
+                       // mcc=int.Parse(record.mcc);
+                       mcc=(MCC) Enum.Parse(typeof(MCC),record.mcc);
                     }
                     var transaction=new TransactionEntity(){Id=record.id,
                     BeneficiaryName=values[1],

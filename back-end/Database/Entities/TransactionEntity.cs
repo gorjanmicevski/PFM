@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using pfm.Models;
 using PFM.Models;
 
 namespace PFM.Database.Entities{
@@ -21,7 +22,7 @@ namespace PFM.Database.Entities{
         [Required]
         [MaxLength(3),MinLength(3)]
         public string Currency	{set;get;}
-        public int? Mcc	{set;get;}
+        public MCC? Mcc	{set;get;}
         [Required]
         public TransactionKind Kind{set;get;}
         public CategoryEntity Category {set;get;}

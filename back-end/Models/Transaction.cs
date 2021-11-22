@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
+using pfm.Models;
 using PFM.Database.Entities;
 
 namespace PFM.Models{
@@ -25,7 +26,7 @@ namespace PFM.Models{
     
         public string Currency	{set;get;}
     
-        public int? Mcc	{set;get;}
+        public MCC? Mcc	{set;get;}
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public TransactionKind? Kind{set;get;}
         public List<SplitTransaction> splits {set;get;}
