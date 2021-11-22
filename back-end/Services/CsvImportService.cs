@@ -44,7 +44,6 @@ namespace PFM.Services{
                 }
                     
             }
-            //Animal animal = (Animal)Enum.Parse(typeof(Animal), str, true)
             return categories;
         
         }
@@ -52,8 +51,6 @@ namespace PFM.Services{
         public List<TransactionEntity> ImportTransactionsCsv(IFormFile formFile)
         {
             var transactions=new List<TransactionEntity>();
-            
-            //var streamReader = new StreamReader(@"C:\Users\Instructor\Downloads\pfm-main\pfm-main\transactions.csv"
             using (var streamReader=new StreamReader(formFile.OpenReadStream())){
                 using(var csvReader = new CsvReader(streamReader,CultureInfo.InvariantCulture)){
                     
@@ -89,7 +86,6 @@ namespace PFM.Services{
                         mcc=null;
                     }else
                     {
-                       // mcc=int.Parse(record.mcc);
                        mcc=(MCC) Enum.Parse(typeof(MCC),record.mcc);
                     }
                     var transaction=new TransactionEntity(){Id=record.id,
@@ -101,7 +97,6 @@ namespace PFM.Services{
                     }
                     
             }
-            //Animal animal = (Animal)Enum.Parse(typeof(Animal), str, true)
            return transactions;
         }
     }
