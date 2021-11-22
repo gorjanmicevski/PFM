@@ -8,11 +8,8 @@ namespace PFM.Database.Configurations{
         public void Configure(EntityTypeBuilder<SplitTransactionEntity> builder)
         {
             builder.ToTable("splits");
-           // builder.HasKey(s=>s.Id);
             builder.HasKey(split=>new {split.CatCode,split.TransactionId});
-            // builder.HasNoKey();
             builder.Property(s=>s.Amount);
-            // builder.Property(s=>s.Id);
             builder.Property(s=>s.TransactionId);
             builder.Property(s=>s.CatCode);
             builder.HasOne<TransactionEntity>(s=>s.Transaction).WithMany(x=>x.splits).HasForeignKey(x=>x.TransactionId);

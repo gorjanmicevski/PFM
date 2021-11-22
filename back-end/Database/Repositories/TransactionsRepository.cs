@@ -41,7 +41,6 @@ namespace PFM.Database.Repositories{
             
             if(!string.IsNullOrEmpty(sortBy)){
                 if(sortOrder==SortOrder.desc){
-                  //problem 
                     query=query.OrderByDescending(x=>x.Id);
                 }else{
                     query=query.OrderBy(x=>x.Id);
@@ -71,7 +70,6 @@ namespace PFM.Database.Repositories{
         }
         public async Task<TransactionEntity> ImportTransaction(List<TransactionEntity> transactions)
         {
-            //await _dbContext.Transactions.AddAsync(transactionEntity);
             await _dbContext.Transactions.AddRangeAsync(transactions);
             await _dbContext.SaveChangesAsync();
             return transactions[0];
