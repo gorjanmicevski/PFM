@@ -6,6 +6,6 @@ using PFM.Models;
 namespace PFM.Services{
     public interface ICategoriesService{
         Task<List<Category>> Get(string parentId);
-        Task<List<Category>> ImportCategories(List<Category> categories);
+        Task ImportCategories(List<Category> categories);
     }
 }

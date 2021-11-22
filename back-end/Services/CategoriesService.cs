@@ -17,20 +17,22 @@ namespace PFM.Services{
         }
         public async Task<List<Category>> Get(string parentId)
         {
+            if(parentId!=null){
+            var check=await _categoriesRepository.GetCategory(parentId);
+            if(check==null)
+            throw new ErrorException(new Error("category","category with code "+parentId+" does not exist"));
+            }
             var categories=await _categoriesRepository.Get(parentId);
             
             return _mapper.Map<List<Category>>(categories);
         }
 
-        public async Task<List<Category>> ImportCategories(List<Category> categories)
+        public async Task ImportCategories(List<Category> categories)
         {
-            var cats=new List<Category>();
+           
             foreach(Category category in categories){
-                var posted=await _categoriesRepository.Import(_mapper.Map<CategoryEntity>(category));
-                if(posted!=null)
-                    cats.Add(_mapper.Map<Category>(posted));
+               await _categoriesRepository.Import(_mapper.Map<CategoryEntity>(category)); 
             }
-            return cats;
         }
     }
 }

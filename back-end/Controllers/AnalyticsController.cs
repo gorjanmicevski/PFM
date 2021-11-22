@@ -19,8 +19,8 @@ namespace PFM.Controllers{
         }
 
         [HttpGet]
-        public async Task<ActionResult> Get([FromQuery] string catCode,[FromQuery] DateTime? startDate,
-        [FromQuery] DateTime? endDate,[FromQuery] Direction? direction){
+        public async Task<ActionResult> Get([FromQuery(Name ="cat-code")] string catCode,[FromQuery(Name ="start-date")] DateTime? startDate,
+        [FromQuery(Name ="end-date")] DateTime? endDate,[FromQuery] Direction? direction){
             var r=await _transactionService.GetAnalytics(catCode,startDate,endDate,direction);
             return Ok(r);
         }

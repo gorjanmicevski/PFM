@@ -24,7 +24,7 @@ namespace PFM.Repositories{
             return await _dbContext.Categories.FirstOrDefaultAsync(c=>c.Code==catcode);
         }
 
-        public async Task<CategoryEntity> Import(CategoryEntity categoryEntity)
+        public async Task Import(CategoryEntity categoryEntity)
         {
             var check=await _dbContext.Categories.FirstOrDefaultAsync(c=>c.Code==categoryEntity.Code);
             if(check==null){
@@ -49,7 +49,6 @@ namespace PFM.Repositories{
                 _dbContext.Categories.Update(check);                    
             }
             await _dbContext.SaveChangesAsync();
-            return categoryEntity;
         }
     }
 }

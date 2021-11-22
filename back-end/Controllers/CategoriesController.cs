@@ -18,15 +18,19 @@ namespace PFM.Controllers{
             _csvImportService=csvImportService;
         }
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string parentId){
+        public async Task<IActionResult> Get([FromQuery(Name ="parent-id")] string parentId){
+            try{
             var ret=await _categoriesService.Get(parentId);
             return Ok(ret);
+            }catch(ErrorException e){
+                return BadRequest(e.Error);
+            }
         }
         [HttpPost("import")]
         public async Task<IActionResult> ImportCategories([FromForm] IFormFile file){
             
-            var posted=await _categoriesService.ImportCategories(_csvImportService.ImportCategoriesCsv(file));
-            return Ok(posted);
+            await _categoriesService.ImportCategories(_csvImportService.ImportCategoriesCsv(file));
+            return Ok();
         }
     }
 }

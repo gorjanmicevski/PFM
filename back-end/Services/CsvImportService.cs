@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using PFM.Models;
 using System;
+using PFM.Database.Entities;
 
 namespace PFM.Services{
    public class CsvImportService : ICsvImportService
@@ -47,9 +48,9 @@ namespace PFM.Services{
         
         }
 
-        public List<Transaction> ImportTransactionsCsv(IFormFile formFile)
+        public List<TransactionEntity> ImportTransactionsCsv(IFormFile formFile)
         {
-            var transactions=new List<Transaction>();
+            var transactions=new List<TransactionEntity>();
             
             //var streamReader = new StreamReader(@"C:\Users\Instructor\Downloads\pfm-main\pfm-main\transactions.csv"
             using (var streamReader=new StreamReader(formFile.OpenReadStream())){
@@ -89,7 +90,7 @@ namespace PFM.Services{
                     {
                         mcc=int.Parse(record.mcc);
                     }
-                    var transaction=new Transaction(){Id=record.id,
+                    var transaction=new TransactionEntity(){Id=record.id,
                     BeneficiaryName=values[1],
                     Date=date,Direction=direction,Amount=amount,Description=record.description,
                     Currency=record.currency,Mcc=mcc,Kind=kind};

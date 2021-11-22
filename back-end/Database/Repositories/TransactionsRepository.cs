@@ -26,18 +26,22 @@ namespace PFM.Database.Repositories{
             return toRemove;
         }
 
-        public async Task<TransactionPagedList<TransactionEntity>> Get(TransactionKind? transactionKind,string startDate, string endDate,
+        public async Task<TransactionPagedList<TransactionEntity>> Get(TransactionKind? transactionKind,DateTime? startDate, DateTime? endDate,
             int page = 1, int pageSize = 10, string sortBy = null, SortOrder sortOrder = SortOrder.asc)
         {
             var query= _dbContext.Transactions.AsQueryable();
             if(transactionKind!=null)
                 query=query.Where(x=>x.Kind==transactionKind);
+            if(startDate!=null)
+                query=query.Where(x=>x.Date>=startDate);
+            if(endDate!=null)
+                query=query.Where(x=> x.Date<=endDate);
             var total= await query.CountAsync();
             var totalP=(int)Math.Ceiling(total*1.0/pageSize);
             
             if(!string.IsNullOrEmpty(sortBy)){
                 if(sortOrder==SortOrder.desc){
-                    //problem 
+                  //problem 
                     query=query.OrderByDescending(x=>x.Id);
                 }else{
                     query=query.OrderBy(x=>x.Id);
@@ -49,8 +53,9 @@ namespace PFM.Database.Repositories{
                 query=query.OrderBy(x=>x.Id);
             }
             query=query.Skip((page-1)*pageSize).Take(pageSize);
-            var items=await query.ToListAsync();
-        
+            var items=query.ToList();
+            if(pageSize>total)
+            pageSize=total;
             return new TransactionPagedList<TransactionEntity>{
                 Page=page,
                 PageSize=pageSize,
@@ -64,11 +69,12 @@ namespace PFM.Database.Repositories{
         public async Task<TransactionEntity> GetTransaction(string id){
             return await _dbContext.Transactions.FirstOrDefaultAsync(x=>x.Id==id);
         }
-        public async Task<TransactionEntity> ImportTransaction(TransactionEntity transactionEntity)
+        public async Task<TransactionEntity> ImportTransaction(List<TransactionEntity> transactions)
         {
-            await _dbContext.Transactions.AddAsync(transactionEntity);
+            //await _dbContext.Transactions.AddAsync(transactionEntity);
+            await _dbContext.Transactions.AddRangeAsync(transactions);
             await _dbContext.SaveChangesAsync();
-            return transactionEntity;
+            return transactions[0];
 
         }
         public async Task<List<SplitTransactionEntity>> GetSplitsIfExists(string id){

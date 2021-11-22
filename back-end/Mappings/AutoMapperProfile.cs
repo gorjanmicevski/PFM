@@ -9,6 +9,7 @@ namespace PFM.Mappings{
             CreateMap<TransactionEntity,Transaction>();
             CreateMap<Transaction,TransactionEntity>();
             CreateMap<TransactionPagedList<TransactionEntity>,TransactionPagedList<Transaction>>();
+            //CreateMap<List<Transaction>,List<TransactionEntity>>();
             CreateMap<List<Category>,List<CategoryEntity>>();
             CreateMap<CategoryEntity,Category>();
             CreateMap<Category,CategoryEntity>();

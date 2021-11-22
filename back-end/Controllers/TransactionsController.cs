@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,8 +22,10 @@ namespace PFM.Controllers{
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTransactions([FromQuery] string transactionKind, [FromQuery] string startDate, [FromQuery] string endDate,
-         [FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string sortBy, [FromQuery] SortOrder? sortOrder){
+        public async Task<IActionResult> GetTransactions([FromQuery(Name ="transaction-kind")] string transactionKind, 
+        [FromQuery(Name="start-date")] DateTime? startDate, [FromQuery(Name ="end-date")] DateTime? endDate,
+         [FromQuery] int? page, [FromQuery(Name ="page-size")] int? pageSize, [FromQuery(Name ="sort-by")] string sortBy,
+          [FromQuery(Name ="sort-order")] SortOrder? sortOrder){
            page ??= 1;
            pageSize ??= 10;
            sortOrder??=SortOrder.asc;
@@ -32,26 +35,28 @@ namespace PFM.Controllers{
 
         [HttpPost("import")]
         public async Task<IActionResult> ImportTransactions([FromForm] IFormFile file){
-            var rez=await _transactionService.ImportTransactions(_csvImportService.ImportTransactionsCsv(file));
+            await _transactionService.ImportTransactions(_csvImportService.ImportTransactionsCsv(file));
             return Ok();
         }
 
         [HttpPost("{id}/split")]
         public async Task<IActionResult> SplitTransaction([FromRoute] string id, [FromBody] SplitTransactionCommand command){
-            await _transactionService.SplitTransaction(id,command);
-            return Ok();
+            try{         
+            var rez=await _transactionService.SplitTransaction(id,command);
+            return Ok(rez);
+            }catch(ErrorException e){
+                return BadRequest(e.Error);
+            }
         }
 
         [HttpPost("{id}/categorize")]
         public async Task<IActionResult> CategorizeTransaction([FromRoute] string id, [FromBody] TransactionCategorizeCommand command){
-            var rez=(await _transactionService.CategorizeTransaction(id,command));
-            return Ok(rez);
-            
-        }
-
-        [HttpPost("auto-categorize")]
-        public IActionResult CategorizeTransactions(){
-            return Ok();
-        }
+            try{
+                var rez=(await _transactionService.CategorizeTransaction(id,command));
+                return Ok(rez);
+            }catch(ErrorException e){
+                return BadRequest(e.Error);
+            }   
+        } 
     }
 }

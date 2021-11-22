@@ -21,21 +21,19 @@ namespace PFM.Services{
                 _transactionRepository=transactionRepository;
                 _categoriesRepository=categoriesRepository;
         }
-        public async Task<TransactionPagedList<Transaction>> GetTransactios(string transactionKind,string startDate, string endDate,
+        public async Task<TransactionPagedList<Transaction>> GetTransactios(string transactionKind,DateTime? startDate, DateTime? endDate,
         int page = 1, int pageSize = 10,string sortBy = null, SortOrder sortOrder = SortOrder.asc)
         {
             var transactionList=new TransactionPagedList<TransactionEntity>();
             if(string.IsNullOrEmpty(transactionKind))
             transactionList= await _transactionRepository.Get(null,startDate,endDate,page,pageSize,sortBy,sortOrder);
             else{
-                //Animal animal = (Animal)Enum.Parse(typeof(Animal), str, true)
                 var kind=(TransactionKind)Enum.Parse(typeof(TransactionKind),transactionKind,true);
                 transactionList= await _transactionRepository.Get(kind,startDate,endDate,page,pageSize,sortBy,sortOrder);
             }
             var transactions=_mapper.Map<TransactionPagedList<Transaction>>(transactionList);
             foreach(Transaction t in transactions.Items){
                 var splited=await _transactionRepository.GetSplitsIfExists(t.Id);
-               // t.splits=_mapper.Map<List<SplitTransaction>>(splited);
                 foreach(SplitTransactionEntity s in splited){
                    t.splits.Add(_mapper.Map<SplitTransaction>(s));
                 }
@@ -44,27 +42,24 @@ namespace PFM.Services{
             return transactions;
         }
 
-        public async Task<List<Transaction>> ImportTransactions(List<Transaction> transactions)
+        public async Task ImportTransactions(List<TransactionEntity> transactions)
         {
-            foreach(Transaction t in transactions){
-                await _transactionRepository.ImportTransaction(_mapper.Map<TransactionEntity>(t));
-            }   
-            return transactions;
+            await _transactionRepository.ImportTransaction(transactions);
         }
         public async Task<Transaction> CategorizeTransaction(string id,TransactionCategorizeCommand command){
-
+            
             var transactionToCategorize=await _transactionRepository.GetTransaction(id);
             if(transactionToCategorize==null)
-            return null;
+               throw new ErrorException(new Error("transaction","not found"));
             if(string.IsNullOrEmpty(command.catcode))
-            return null;
+                throw new ErrorException(new Error("category code","invalid input"));
             transactionToCategorize.CatCode=command.catcode;
             var category=await _categoriesRepository.GetCategory(command.catcode);
             if(category==null)
-            return null;
+                throw new ErrorException(new Error("category","not found"));
             transactionToCategorize.Category=category;
             var updated=  _mapper.Map<Transaction>(await _transactionRepository.UpdateTransaction(transactionToCategorize));
-            return updated;
+            return updated; 
         }
 
         public async Task<Transaction> SplitTransaction(string id, SplitTransactionCommand command)
@@ -72,26 +67,25 @@ namespace PFM.Services{
             var addedSplits=new List<SplitTransactionEntity>();
             var transactionToSplit=await _transactionRepository.GetTransaction(id);
             if(transactionToSplit==null)
-            return null;
+                throw new ErrorException(new Error("transaction","not found"));
             var totalAmount=transactionToSplit.Amount;
-            totalAmount??= 0;
-            //var dict=new Dictionary<string,double>();
             Double checkAmount=0;
             foreach(SingleCategorySplit split in command.splits){
                 checkAmount+=split.amount;
             }
-            if(checkAmount!=totalAmount.Value)
-            return null;
+            if(checkAmount!=totalAmount)
+                throw new ErrorException(new Error("transactions splits","not defined correctly"));
             var check=await _transactionRepository.DeleteIfExists(id);
             transactionToSplit.splits=new List<SplitTransactionEntity>();
             foreach(SingleCategorySplit split in command.splits){
                 var catCode=split.catcode;
-                //var category= await _dbContext.Categories.FirstOrDefaultAsync(x=>x.Code==catcode);
+                if(string.IsNullOrEmpty(catCode))
+                    throw new ErrorException(new Error("category code","invalid input"));
                 var category=await _categoriesRepository.GetCategory(catCode);
-                if(catCode==null)
-                return null;
+                if(category==null){
+                    throw new ErrorException(new Error("category","not found"));
+                }
                 var amount=split.amount;
-                //dict.Add(category,amount);
                 var splitEntity=new SplitTransactionEntity(){
                 CatCode=catCode,
                 Transaction=transactionToSplit,
@@ -103,11 +97,10 @@ namespace PFM.Services{
                     await _transactionRepository.ImportSplitTransactionEntity(splitEntity);
                 }
                 else{
-                    splitEntity.Amount=totalAmount.Value;
+                    splitEntity.Amount=totalAmount;
                     await _transactionRepository.ImportSplitTransactionEntity(splitEntity);
                     break;
                 }
-                
                 totalAmount=totalAmount-amount;
             }
             var p=await _transactionRepository.UpdateTransaction(transactionToSplit);
@@ -122,6 +115,7 @@ namespace PFM.Services{
             var transactions= _mapper.Map<List<Transaction>>(await _transactionRepository.GetAnalytics(catCode,startDate,endDate,direction)) ;
             var categories= new List<string>();
             foreach(Transaction transaction in transactions){
+                if(transaction.CatCode!=null)
                 if(!categories.Contains(transaction.CatCode))
                 categories.Add(transaction.CatCode);
             }
